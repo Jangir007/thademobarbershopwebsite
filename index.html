@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Cut - Premium Hair Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:wght@100..900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --gold: #C5A059;
+            --transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        /* Темная тема */
+        .dark {
+            --bg: #050505;
+            --text: #ffffff;
+            --card-bg: #0f0f0f;
+            --accent: #1a1a1a;
+            --border: rgba(255, 255, 255, 0.07);
+            --subtext: #a1a1aa;
+        }
+
+        /* Светлая тема */
+        .light {
+            --bg: #fafafa;
+            --text: #121212;
+            --card-bg: #ffffff;
+            --accent: #f0f0f0;
+            --border: rgba(0, 0, 0, 0.07);
+            --subtext: #666666;
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Raleway', sans-serif;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            cursor: none;
+            transition: background-color 0.8s ease;
+        }
+
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+
+        /* Улучшенный курсор */
+        #cursor-dot {
+            width: 8px; height: 8px; background: var(--gold);
+            position: fixed; border-radius: 50%; pointer-events: none;
+            z-index: 10000; transform: translate(-50%, -50%);
+            mix-blend-mode: difference;
+        }
+
+        #cursor-outline {
+            width: 45px; height: 45px; border: 1px solid var(--gold);
+            position: fixed; border-radius: 50%; pointer-events: none;
+            z-index: 9999; transform: translate(-50%, -50%);
+            transition: width 0.4s, height 0.4s, border-color 0.4s, background-color 0.4s;
+        }
+
+        /* Параллакс заголовок */
+        .parallax-title {
+            transition: transform 0.1s ease-out;
+            will-change: transform;
+        }
+
+        .text-reveal-wrapper {
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        /* Анимированный фон */
+        .blob {
+            position: fixed; border-radius: 50%; filter: blur(120px);
+            z-index: -1; opacity: 0.12; animation: float 20s infinite alternate;
+        }
+        @keyframes float {
+            0% { transform: translate(-10%, -10%) rotate(0deg); }
+            100% { transform: translate(10%, 15%) rotate(180deg); }
+        }
+
+        .reveal {
+            opacity: 0; transform: translateY(30px);
+            transition: var(--transition);
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        .glass-nav {
+            background: rgba(var(--bg), 0.6);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .btn-gold {
+            background: var(--gold);
+            color: white;
+            transition: var(--transition);
+            position: relative; overflow: hidden;
+        }
+        .btn-gold::after {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+        .btn-gold:hover::after { left: 100%; }
+        .btn-gold:hover { transform: scale(1.05); box-shadow: 0 15px 30px rgba(197, 160, 89, 0.4); }
+
+        .service-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            perspective: 1000px;
+        }
+        .service-card:hover { 
+            border-color: var(--gold); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .line-draw {
+            width: 0; height: 1px; background: var(--gold);
+            transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.visible .line-draw { width: 100px; }
+
+        /* Переключатель темы */
+        #theme-toggle {
+            cursor: none;
+            padding: 10px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        #theme-toggle:hover { background: var(--border); transform: rotate(15deg); }
+
+        .magnetic-wrap {
+            display: inline-block;
+            transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+    </style>
+</head>
+<body class="selection:bg-[#C5A059]/30">
+
+    <div id="cursor-dot"></div>
+    <div id="cursor-outline"></div>
+
+    <!-- Анимированные сферы -->
+    <div class="blob w-[600px] h-[600px] bg-[#C5A059] top-[-10%] left-[-10%]"></div>
+    <div class="blob w-[500px] h-[500px] bg-[#E9DCC9] bottom-[-10%] right-[-10%]" style="animation-delay: -5s;"></div>
+
+    <!-- Навигация -->
+    <nav class="fixed w-full z-50 glass-nav py-5 px-6 md:px-12 flex justify-between items-center transition-all duration-500" id="navbar">
+        <div class="text-2xl font-light tracking-tighter uppercase magnetic-wrap">
+            Barber <span class="text-[#C5A059] italic font-serif">Shop</span>
+        </div>
+        
+        <div class="hidden lg:flex space-x-12 uppercase text-[10px] tracking-[0.4em] font-bold opacity-50">
+            <a href="#about" class="hover:text-[#C5A059] transition-colors" data-i18n="nav-about">Sobre</a>
+            <a href="#services" class="hover:text-[#C5A059] transition-colors" data-i18n="nav-services">Servicios</a>
+            <a href="#contact" class="hover:text-[#C5A059] transition-colors" data-i18n="nav-contact">Contacto</a>
+        </div>
+
+        <div class="flex items-center space-x-6">
+            <button id="theme-toggle" class="flex items-center justify-center">
+                <i data-lucide="moon" class="w-5 h-5 dark:hidden"></i>
+                <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+            </button>
+            <div class="relative group">
+                <select id="lang-select" class="appearance-none bg-transparent text-[10px] tracking-[0.2em] outline-none cursor-none uppercase font-black border-b border-gold/40 pr-4">
+                    <option value="es" class="text-black">ES</option>
+                    <option value="en" class="text-black">EN</option>
+                    <option value="ru" class="text-black">RU</option>
+                </select>
+                <i data-lucide="chevron-down" class="w-3 h-3 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none opacity-40"></i>
+            </div>
+            <a href="https://wa.me/yournumber" class="btn-gold px-8 py-3 rounded-full text-[10px] font-black tracking-[0.2em] uppercase" data-i18n="book-btn">Reservar</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex flex-col items-center justify-center px-6 md:px-12 pt-40 pb-20 relative overflow-hidden text-center">
+        <div class="max-w-5xl mx-auto w-full reveal parallax-container">
+            <div class="flex flex-col items-center mb-10">
+                <div class="line-draw mb-6"></div>
+                <span class="text-[#C5A059] uppercase tracking-[0.8em] text-[10px] font-black" data-i18n="hero-tag">The Art of Perfection</span>
+            </div>
+            
+            <h1 class="parallax-title text-[80px] md:text-[160px] leading-[0.85] font-light tracking-tighter mb-12 select-none">
+                Barber <br><span class="italic font-serif text-[#C5A059] drop-shadow-sm">CUTS.</span>
+            </h1>
+            
+            <p class="text-lg md:text-2xl font-light opacity-60 max-w-3xl mx-auto leading-relaxed mb-16 px-4" data-i18n="hero-subtitle">Redefinimos la estética masculina a través de la precisión и элитного сервиса.</p>
+            
+            <div class="flex flex-col sm:flex-row items-center justify-center space-y-8 sm:space-y-0 sm:space-x-12">
+                <a href="#services" class="btn-gold px-14 py-5 rounded-full text-[11px] font-black tracking-widest uppercase w-full sm:w-auto" data-i18n="hero-btn-1">Servicios</a>
+                <a href="#contact" class="group flex items-center space-x-4 text-[11px] font-black tracking-widest uppercase" data-i18n="hero-btn-2">
+                    <span data-i18n="hero-btn-2">Contacto</span>
+                    <div class="w-10 h-[1px] bg-current group-hover:w-16 transition-all duration-700"></div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Decorative Image -->
+        <div class="mt-28 w-full max-w-6xl h-[500px] md:h-[700px] reveal overflow-hidden relative rounded-sm shadow-2xl group" style="transition-delay: 0.4s;">
+            <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-all duration-1000 z-10"></div>
+            <img src="https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&q=80&w=1600" alt="Mastery" class="w-full h-full object-cover grayscale group-hover:grayscale-0 scale-110 group-hover:scale-100 transition-all duration-[2s]">
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-40 px-6 md:px-12 max-w-7xl mx-auto">
+        <div class="grid lg:grid-cols-2 gap-24 items-center">
+            <div class="reveal space-y-10">
+                <div class="space-y-4">
+                    <h2 class="text-5xl md:text-7xl font-light italic font-serif leading-tight" data-i18n="about-title">El Arte del Silencio</h2>
+                    <div class="w-20 h-1 bg-[#C5A059]"></div>
+                </div>
+                <p class="text-3xl md:text-4xl font-light leading-tight opacity-90" data-i18n="about-p1">Fusión perfecta entre el ritual clásico и эстетикой будущего.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-6">
+                    <div class="space-y-2">
+                        <span class="text-[#C5A059] font-serif italic text-2xl">01.</span>
+                        <p class="opacity-50 uppercase tracking-widest text-[9px] font-bold" data-i18n="stat-1">Maestría artesanal.</p>
+                    </div>
+                    <div class="space-y-2">
+                        <span class="text-[#C5A059] font-serif italic text-2xl">02.</span>
+                        <p class="opacity-50 uppercase tracking-widest text-[9px] font-bold" data-i18n="stat-2">Ambiente exclusivo.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="reveal relative p-4 border border-gold/20">
+                <img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&q=80&w=1000" alt="Barber" class="w-full h-auto grayscale shadow-2xl">
+                <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-gold/10 -z-10 blur-2xl"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-40 bg-current/[0.01]">
+        <div class="max-w-7xl mx-auto px-6 md:px-12">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-20 reveal">
+                <div class="max-w-xl">
+                    <h2 class="text-6xl md:text-8xl font-light mb-6 tracking-tighter" data-i18n="services-title">Menu</h2>
+                    <p class="opacity-40 uppercase tracking-[0.3em] text-[10px] font-bold" data-i18n="services-subtitle">Seleccionamos lo mejor para ti</p>
+                </div>
+                <div class="hidden md:block w-32 h-[1px] bg-gold mb-4"></div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-10">
+                <!-- Card 1 -->
+                <div class="service-card group p-12 reveal">
+                    <div class="flex justify-between items-start mb-16">
+                        <i data-lucide="scissors" class="w-8 h-8 text-[#C5A059] transition-transform duration-500 group-hover:rotate-12"></i>
+                        <span class="text-3xl font-serif italic">50€</span>
+                    </div>
+                    <h3 class="text-3xl mb-6 uppercase tracking-tighter font-light" data-i18n="s1-title">Corte Básico</h3>
+                    <p class="opacity-50 text-sm mb-12 leading-relaxed h-12" data-i18n="s1-desc">Corte de precisión y diseño de estilo.</p>
+                    <div class="flex items-center space-x-4 pt-8 border-t border-current/10">
+                        <span class="text-[10px] tracking-widest uppercase font-bold opacity-40">15 MINUTOS</span>
+                    </div>
+                </div>
+                <!-- Card 2 -->
+                <div class="service-card group p-12 reveal" style="transition-delay: 0.15s;">
+                    <div class="flex justify-between items-start mb-16">
+                        <i data-lucide="spray-can" class="w-8 h-8 text-[#C5A059] transition-transform duration-500 group-hover:rotate-12"></i>
+                        <span class="text-3xl font-serif italic">40€</span>
+                    </div>
+                    <h3 class="text-3xl mb-6 uppercase tracking-tighter font-light" data-i18n="s2-title">Tradición</h3>
+                    <p class="opacity-50 text-sm mb-12 leading-relaxed h-12" data-i18n="s2-desc">Ritual clásico con afeitado y cuidado.</p>
+                    <div class="flex items-center space-x-4 pt-8 border-t border-current/10">
+                        <span class="text-[10px] tracking-widest uppercase font-bold opacity-40">25 MINUTOS</span>
+                    </div>
+                </div>
+                <!-- Card 3 -->
+                <div class="service-card group p-12 reveal" style="transition-delay: 0.3s;">
+                    <div class="flex justify-between items-start mb-16">
+                        <i data-lucide="crown" class="w-8 h-8 text-[#C5A059] transition-transform duration-500 group-hover:scale-110"></i>
+                        <span class="text-3xl font-serif italic">95€</span>
+                    </div>
+                    <h3 class="text-3xl mb-6 uppercase tracking-tighter font-light" data-i18n="s3-title">Aura Cut</h3>
+                    <p class="opacity-50 text-sm mb-12 leading-relaxed h-12" data-i18n="s3-desc">Corte de precisión y diseño de estilo.</p>
+                    <div class="flex items-center space-x-4 pt-8 border-t border-current/10">
+                        <span class="text-[10px] tracking-widest uppercase font-bold opacity-40">20 MINUTOS</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-40 px-6 md:px-12">
+        <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-32 items-center">
+            <div class="reveal">
+                <h2 class="text-6xl md:text-9xl font-light mb-16 leading-[0.9]" data-i18n="contact-title">Dinos <br><span class="text-[#C5A059] italic font-serif">Hola.</span></h2>
+                <div class="space-y-12">
+                    <div class="group">
+                        <p class="text-[10px] uppercase tracking-[0.5em] opacity-30 mb-4 font-bold" data-i18n="c-phone">Teléfono</p>
+                        <a href="tel:+34912345678" class="text-3xl md:text-4xl font-light hover:text-[#C5A059] transition-all block">+34 123 456 789</a>
+                    </div>
+                    <div class="group">
+                        <p class="text-[10px] uppercase tracking-[0.5em] opacity-30 mb-4 font-bold" data-i18n="c-email">Email</p>
+                        <a href="mailto:hello@aurastudio.com" class="text-3xl md:text-4xl font-light hover:text-[#C5A059] transition-all block underline decoration-gold/30">qwerty@gmail.com</a>
+                    </div>
+                </div>
+            </div>
+            <div class="reveal relative h-[600px] w-full bg-current/[0.03] flex items-center justify-center rounded-xl overflow-hidden shadow-inner group">
+                <div class="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                <div class="relative z-10 text-center">
+                    <i data-lucide="13, C. del Mar, 03189 Cabo Roig, Alicante" class="w-16 h-16 text-[#C5A059] mx-auto mb-8 animate-bounce"></i>
+                    <p class="text-2xl font-light max-w-xs mx-auto" data-i18n="address">13, C. del Mar, 03189 Cabo Roig, Alicante</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-20 border-t border-current/5 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-[10px] tracking-[0.5em] uppercase font-bold opacity-40 text-center md:text-left">
+            <p>© 2025 AURA STUDIO • ELEVATING THE RITUAL</p>
+            <div class="flex space-x-12 mt-10 md:mt-0">
+                <a href="#" class="hover:text-[#C5A059] transition-colors">Instagram</a>
+                <a href="#" class="hover:text-[#C5A059] transition-colors">Journal</a>
+                <a href="#" class="hover:text-[#C5A059] transition-colors">Spotify</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Тема
+        const toggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        
+        toggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            html.classList.toggle('light');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            html.classList.replace('light', 'dark');
+        }
+
+        // Продвинутый курсор
+        const dot = document.getElementById('cursor-dot');
+        const outline = document.getElementById('cursor-outline');
+        let mx = 0, my = 0, ox = 0, oy = 0;
+
+        window.addEventListener('mousemove', e => {
+            mx = e.clientX; my = e.clientY;
+            dot.style.left = mx + 'px';
+            dot.style.top = my + 'px';
+            
+            // Параллакс эффект для заголовка
+            const title = document.querySelector('.parallax-title');
+            if (title) {
+                const x = (window.innerWidth / 2 - mx) / 45;
+                const y = (window.innerHeight / 2 - my) / 45;
+                title.style.transform = `translate3d(${x}px, ${y}px, 0) rotateX(${-y}deg) rotateY(${x}deg)`;
+            }
+        });
+
+        function animateCursor() {
+            ox += (mx - ox) * 0.12;
+            oy += (my - oy) * 0.12;
+            outline.style.left = ox + 'px';
+            outline.style.top = oy + 'px';
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Hover эффекты
+        document.querySelectorAll('a, button, select, .service-card').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                outline.style.width = '90px';
+                outline.style.height = '90px';
+                outline.style.borderColor = 'rgba(197, 160, 89, 0.4)';
+                outline.style.backgroundColor = 'rgba(197, 160, 89, 0.05)';
+            });
+            el.addEventListener('mouseleave', () => {
+                outline.style.width = '45px';
+                outline.style.height = '45px';
+                outline.style.borderColor = 'var(--gold)';
+                outline.style.backgroundColor = 'transparent';
+            });
+        });
+
+        // Навигация при скролле
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            const currentScroll = window.pageYOffset;
+            if (currentScroll > 100) {
+                nav.style.padding = '15px 3rem';
+                nav.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
+            } else {
+                nav.style.padding = '25px 3rem';
+                nav.style.boxShadow = 'none';
+            }
+            lastScroll = currentScroll;
+        });
+
+        // Переводы
+        const translations = {
+            es: {
+                "nav-about": "Sobre", "nav-services": "Servicios", "nav-contact": "Contacto",
+                "book-btn": "Reservar", "hero-tag": "The Art of Perfection", "hero-subtitle": "Redefinimos la estética masculina a través de la precisión и элитного сервиса.",
+                "hero-btn-1": "Servicios", "hero-btn-2": "Contacto", "about-title": "El Arte del Silencio",
+                "about-p1": "Fusión perfecta entre el ritual clásico и эстетикой будущего.",
+                "stat-1": "Maestría artesanal.", "stat-2": "Ambiente exclusivo.",
+                "services-title": "Menu", "services-subtitle": "Seleccionamos lo mejor para ti",
+                "s1-title": "Aura Cut", "s1-desc": "Corte de precisión и дизайн стиля.",
+                "s2-title": "Tradición", "s2-desc": "Ritual clásico с бритьем и уходом.",
+                "s3-title": "The Ritual", "s3-desc": "Полный уход за волосами и кожей.",
+                "contact-title": "Dinos Hola.", "c-phone": "Teléfono", "c-email": "Email", "c-loc": "Dirección",
+                "address": "Paseo de la Castellana 45, Madrid"
+            },
+            en: {
+                "nav-about": "About", "nav-services": "Services", "nav-contact": "Contact",
+                "book-btn": "Book", "hero-tag": "The Art of Perfection", "hero-subtitle": "Redefining masculine aesthetics through precision and elite service.",
+                "hero-btn-1": "Services", "hero-btn-2": "Contact", "about-title": "The Art of Silence",
+                "about-p1": "Perfect fusion between classic ritual and future aesthetics.",
+                "stat-1": "Craft mastery.", "stat-2": "Exclusive vibes.",
+                "services-title": "Menu", "services-subtitle": "Only the best for you",
+                "s1-title": "Aura Cut", "s1-desc": "Precision cut and style design.",
+                "s2-title": "Tradition", "s2-desc": "Classic ritual with shave and care.",
+                "s3-title": "The Ritual", "s3-desc": "Complete hair and skin ritual.",
+                "contact-title": "Say Hello.", "c-phone": "Phone", "c-email": "Email", "c-loc": "Address",
+                "address": "Paseo de la Castellana 45, Madrid"
+            },
+            ru: {
+                "nav-about": "О нас", "nav-services": "Услуги", "nav-contact": "Контакты",
+                "book-btn": "Запись", "hero-tag": "Искусство Совершенства", "hero-subtitle": "Мы переосмысливаем мужскую эстетику через точность и элитный сервис.",
+                "hero-btn-1": "Услуги", "hero-btn-2": "Контакты", "about-title": "Искусство Тишины",
+                "about-p1": "Идеальное сочетание классического ритуала и эстетики будущего.",
+                "stat-1": "Мастерство исполнения.", "stat-2": "Эксклюзивная атмосфера.",
+                "services-title": "Меню", "services-subtitle": "Лучшее для вашего стиля",
+                "s1-title": "Стрижка Aura", "s1-desc": "Прецизионная стрижка и подбор стиля.",
+                "s2-title": "Традиция", "s2-desc": "Классический ритуал с бритьем и уходом.",
+                "s3-title": "Ритуал", "s3-desc": "Полный комплексный уход премиум-класса.",
+                "contact-title": "Привет.", "c-phone": "Телефон", "c-email": "Почта", "c-loc": "Адрес",
+                "address": "Пасео-де-ла-Кастельяна 45, Мадрид"
+            }
+        };
+
+        function switchLanguage(lang) {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    el.style.opacity = 0;
+                    setTimeout(() => {
+                        el.textContent = translations[lang][key];
+                        el.style.opacity = 1;
+                    }, 300);
+                }
+            });
+            document.documentElement.lang = lang;
+        }
+
+        document.getElementById('lang-select').addEventListener('change', e => switchLanguage(e.target.value));
+
+        // Reveal effect
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    </script>
+</body>
+</html>
